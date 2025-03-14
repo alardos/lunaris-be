@@ -1,3 +1,3 @@
 package com.alardos.lunaris.auth
 
-class LoginCred(val email: String, val password: String)
+class LoginCred(val email: String, var password: String)

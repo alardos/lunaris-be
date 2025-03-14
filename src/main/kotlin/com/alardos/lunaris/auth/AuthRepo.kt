@@ -26,9 +26,26 @@ class AuthRepo(@Autowired val jdbi: Jdbi) {
             handle.createQuery("""insert into users(email,password,first_name,last_name) 
                 values ('${user.email}', '${user.password}', '${user.firstName}', '${user.lastName}') returning *""")
                 .map(UserMapper()).first()
+        }
+    }
 
+    fun store(token: RefreshToken) {
+        jdbi.useHandle<Exception> { handle ->
+            handle.execute("insert into refresh_tokens(token) values (${token.value});")
+        }
+    }
 
         }
+    fun find(token: RefreshToken): RefreshToken? {
+        return jdbi.withHandle<RefreshToken?, Exception> { handle ->
+            handle.createQuery("select token from refresh_tokens where token = ${token.value};")
+                .mapTo(String::class.java).findOne().orElse(null)?.let { RefreshToken(it) }
+        }
+    }
 
+    fun invalidate(token: RefreshToken) {
+        return jdbi.useHandle<Exception> { handle ->
+            handle.execute("delete from refresh_tokens where token = ${token.value}")
+        }
     }
 }

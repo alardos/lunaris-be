@@ -52,4 +52,6 @@ class AuthIntTest(
         }
         assertNotNull(repo.findByEmail(user.email))
     }
+
+    // todo: test for refresh
 }

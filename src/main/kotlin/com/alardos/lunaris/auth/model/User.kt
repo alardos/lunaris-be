@@ -1,7 +1,8 @@
-package com.alardos.lunaris.auth
+package com.alardos.lunaris.auth.model
 
 import org.jdbi.v3.core.mapper.RowMapper
 import org.jdbi.v3.core.statement.StatementContext
+import org.springframework.security.core.GrantedAuthority
 import java.sql.ResultSet
 
 class User(
@@ -9,18 +10,39 @@ class User(
     var password: String,
     var firstName: String,
     var lastName: String,
+    val authorities: Collection<GrantedAuthority?>?,
 ) {
     lateinit var id: String
+
+    constructor(
+        email: String,
+        password: String,
+        firstName: String,
+        lastName: String,
+        ): this(email, password, firstName,lastName, HashSet()) {
+    }
+
     constructor(
         id: String,
         email: String,
         password: String,
         firstName: String,
         lastName: String,
-    ): this(email, password, firstName,lastName) {
+
+    ): this(email, password, firstName,lastName, HashSet()) {
         this.id = id
     }
 
+    constructor(
+        id: String,
+        email: String,
+        password: String,
+        firstName: String,
+        lastName: String,
+        authorities: HashSet<GrantedAuthority>,
+    ): this(email, password, firstName,lastName, authorities) {
+        this.id = id
+    }
 }
 
 
@@ -33,7 +55,7 @@ class UserMapper : RowMapper<User> {
             password = rs.getString("password"),
             firstName = rs.getString("first_name"), // Different column name
             lastName = rs.getString("last_name"), // Different column name
-
+            HashSet(),
         )
     }
 }

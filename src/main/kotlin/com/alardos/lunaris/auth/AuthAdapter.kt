@@ -1,21 +1,18 @@
 package com.alardos.lunaris.auth
 
+import com.alardos.lunaris.auth.model.*
 import io.jsonwebtoken.Jwts
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
-import java.util.*
-import javax.crypto.SecretKey
 
 
 @Service
 class AuthAdapter(
     @Autowired val repo: AuthRepo,
     @Autowired val passwordEncoder: PasswordEncoder
-)  {
+) {
     val serv = AuthServ(Jwts.SIG.HS256.key().build(), passwordEncoder)
-
-    fun findUser(id: String) = repo.findUser(id)
 
     fun signup(user: User) {
         user.password=passwordEncoder.encode(user.password)
@@ -24,7 +21,11 @@ class AuthAdapter(
 
     fun login(cred: LoginCred): Pair<AccessToken, RefreshToken>? {
         val user = repo.findByEmail(cred.email)
-        return user?.let { serv.login(cred, it) }
+        return user?.let {
+            val tokens = serv.login(cred, it)
+            tokens?.run { repo.store(tokens.second) }
+            tokens
+        }
     }
 
     fun refresh(token: RefreshToken): Pair<AccessToken, RefreshToken>? {
@@ -54,6 +55,4 @@ class AuthAdapter(
         }
     }
 
-        }
-    }
 }

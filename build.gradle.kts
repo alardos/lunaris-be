@@ -55,8 +55,9 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("org.springframework.security:spring-security-crypto:6.4.3")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
+	implementation("org.springframework.boot:spring-boot-starter-security:3.4.3")
 
-    implementation("org.jdbi:jdbi3-kotlin:3.48.0")
+	implementation("org.jdbi:jdbi3-kotlin:3.48.0")
 	testImplementation("org.jdbi:jdbi3-testing:3.48.0")
 
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")

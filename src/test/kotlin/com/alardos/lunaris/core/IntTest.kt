@@ -1,10 +1,16 @@
 package com.alardos.lunaris.core
 
+import com.alardos.lunaris.auth.AuthAdapter
+import com.alardos.lunaris.auth.model.AccessToken
+import com.alardos.lunaris.auth.model.LoginCred
+import com.alardos.lunaris.auth.model.User
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.extension.ExtendWith
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
@@ -17,7 +23,10 @@ import org.testcontainers.containers.PostgreSQLContainer
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @AutoConfigureMockMvc
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-class IntTest() {
+class IntTest(
+    @Autowired val authAdapter: AuthAdapter,
+    @Autowired val passwordEncoder: PasswordEncoder,
+) {
 
     companion object {
         val container: PostgreSQLContainer<*> = PostgreSQLContainer("postgres").withReuse(false)
@@ -33,5 +42,13 @@ class IntTest() {
 
     @AfterEach
     fun teardown() { container.stop() }
+
+    fun defaultAuth(): Pair<AccessToken,User> {
+        val password = "password"
+        var user = User("test@test.com", password, "fname", "lname")
+        user = authAdapter.signup(user)
+
+        return authAdapter.login(LoginCred(user.email,password))!!.first to user
+    }
 
 }

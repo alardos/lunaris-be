@@ -14,9 +14,9 @@ class AuthAdapter(
 ) {
     val serv = AuthServ(Jwts.SIG.HS256.key().build(), passwordEncoder)
 
-    fun signup(user: User) {
+    fun signup(user: User): User {
         user.password=passwordEncoder.encode(user.password)
-        repo.save(user)
+        return repo.save(user)
     }
 
     fun login(cred: LoginCred): Pair<AccessToken, RefreshToken>? {

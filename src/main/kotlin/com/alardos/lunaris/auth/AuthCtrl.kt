@@ -16,7 +16,7 @@ class AuthCtrl(@Autowired val adapter: AuthAdapter) {
 
     @PostMapping("/signup")
     fun signup(@RequestBody body: User) {
-        return adapter.signup(body)
+        adapter.signup(body)
     }
 
     @PostMapping("/login")

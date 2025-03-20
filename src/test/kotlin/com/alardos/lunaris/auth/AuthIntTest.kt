@@ -18,8 +18,8 @@ class AuthIntTest(
     @Autowired val repo: AuthRepo,
     @Autowired val adapter: AuthAdapter,
     @Autowired val mvc: MockMvc,
-    @Autowired val passwordEncoder: PasswordEncoder,
-): IntTest() {
+    @Autowired passwordEncoder: PasswordEncoder,
+): IntTest(adapter,passwordEncoder) {
     val mapper: ObjectMapper = jacksonObjectMapper()
 
     @Test

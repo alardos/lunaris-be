@@ -1,9 +1,5 @@
-package com.alardos.lunaris.workspace.card
+package com.alardos.lunaris.workspace
 
-import com.alardos.lunaris.workspace.Workspace
-import com.alardos.lunaris.workspace.WorkspaceCandidate
-import com.alardos.lunaris.workspace.WorkspaceServ
-import com.alardos.lunaris.workspace.WorkspaceValidatorError
 import org.junit.jupiter.api.Test
 import java.util.*
 import kotlin.test.assertEquals
@@ -12,7 +8,8 @@ import kotlin.test.assertNull
 class WorkspaceUnitTest {
     val serv: WorkspaceServ = WorkspaceServ()
 
-    @Test fun `when no problem return null`() {
+    @Test
+    fun `when no problem return null`() {
         val userId = UUID.randomUUID()
         val error = serv.validate(
             WorkspaceCandidate("new Name"),
@@ -24,7 +21,8 @@ class WorkspaceUnitTest {
         assertNull(error)
     }
 
-    @Test fun `given already has name x, when creation with name x reject`() {
+    @Test
+    fun `given already has name x, when creation with name x reject`() {
         val userId = UUID.randomUUID()
         val error = serv.validate(
             WorkspaceCandidate("conflict"),
@@ -33,7 +31,8 @@ class WorkspaceUnitTest {
         assertEquals(WorkspaceValidatorError.NAME_TAKEN, error)
     }
 
-    @Test fun `when new name is empty, then reject`() {
+    @Test
+    fun `when new name is empty, then reject`() {
         val error = serv.validate(
             WorkspaceCandidate(""),
             listOf()

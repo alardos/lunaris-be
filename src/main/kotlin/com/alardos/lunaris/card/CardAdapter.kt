@@ -1,6 +1,8 @@
 package com.alardos.lunaris.card
 
 import com.alardos.lunaris.workspace.WorkspaceRepo
+import com.github.michaelbull.result.Err
+import com.github.michaelbull.result.Ok
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.util.*
@@ -22,5 +24,11 @@ class CardAdapter(
 
     fun forWorkspace(workspace: UUID) =
         repo.forWorkspace(workspace)
+
+    fun update(workspace: UUID, card: Card)  =
+        workspaceRepo.find(workspace)
+            ?.let { w -> serv.validate(w,card) ?.let { Err(it) } }
+            ?:run { Ok(repo.update(card)) }
+
 
 }

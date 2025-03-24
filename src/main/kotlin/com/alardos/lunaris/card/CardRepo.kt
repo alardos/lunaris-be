@@ -23,7 +23,7 @@ class CardRepo(@Autowired val jdbi: Jdbi) {
                         SELECT id, '' FROM inserted_card
                         RETURNING id; """
                     ).mapTo(UUID::class.java).first()
-                    TextCard(id,owner,workspace,Date(),candidate.content!!)
+                    TextCard(id,owner,workspace,Date().time,candidate.content!!)
                 }
             }
         }
@@ -37,7 +37,7 @@ class CardRepo(@Autowired val jdbi: Jdbi) {
                     left join text_cards tc on tc.id = c.id
                     where c.id = '$id';
                 """.trimIndent())
-                .map(CardMapper()).firstOrNull()
+                .map(CardRowMapper()).firstOrNull()
             }
 
     fun forWorkspace(workspace: UUID): List<Card> =
@@ -49,7 +49,24 @@ class CardRepo(@Autowired val jdbi: Jdbi) {
                     left join text_cards tc on tc.id = c.id
                     where c.workspace = '$workspace';
                 """.trimIndent())
-                    .map(CardMapper()).list()
+                    .map(CardRowMapper()).list()
             }
 
+    fun update(card: Card): Card {
+        println(card)
+        return jdbi.withHandle<Card, Exception>
+            { handle ->
+                when (card) {
+                    is TextCard -> {
+                        handle.execute(
+                            """
+                            update text_cards set content = '${card.content}' where id = '${card.id}';
+                        """.trimIndent()
+                        )
+                        card
+                    }
+                }
+
+            }
+    }
 }

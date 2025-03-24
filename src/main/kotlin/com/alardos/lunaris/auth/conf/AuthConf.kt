@@ -91,15 +91,6 @@ class JwtTokenFilter(@Autowired val authAdapter: AuthAdapter) : OncePerRequestFi
 class JwtAuthentication(private val user: User, private var authenticated: Boolean = false): Authentication {
     override fun getAuthorities() = user.authorities
 
-
-    override fun getCredentials(): Any? {
-        TODO("Not yet implemented")
-    }
-
-    override fun getDetails(): Any? {
-        TODO("Not yet implemented")
-    }
-
     override fun getPrincipal(): User = user
 
     /** if this class is used then the authentication already happened */
@@ -110,6 +101,14 @@ class JwtAuthentication(private val user: User, private var authenticated: Boole
     }
 
     override fun getName(): String = user.email
+
+    override fun getCredentials(): Any? {
+        throw RuntimeException("Not yet implemented")
+    }
+
+    override fun getDetails(): Any? {
+        throw throw RuntimeException("Not yet implemented")
+    }
 
 
 }

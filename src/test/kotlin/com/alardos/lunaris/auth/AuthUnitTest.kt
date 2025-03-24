@@ -21,8 +21,8 @@ import kotlin.test.assertTrue
 class AuthUnitTest {
     val key: SecretKey = Jwts.SIG.HS256.key().build()
     val serv: AuthServ = AuthServ(key, NoOpPasswordEncoder.getInstance())
-    val user = User(randomUUID().toString(), "test@test.com", "password", "fname", "lname")
-    val jwtBuilder = Jwts.builder().subject(user.id)
+    val user = User(randomUUID(), "test@test.com", "password", "fname", "lname")
+    val jwtBuilder = Jwts.builder().subject(user.id.toString())
             .expiration(Date(System.currentTimeMillis() + 1000 * 60 * 30))
             .signWith(key)
 

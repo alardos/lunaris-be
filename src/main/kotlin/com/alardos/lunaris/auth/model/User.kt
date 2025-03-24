@@ -4,6 +4,7 @@ import org.jdbi.v3.core.mapper.RowMapper
 import org.jdbi.v3.core.statement.StatementContext
 import org.springframework.security.core.GrantedAuthority
 import java.sql.ResultSet
+import java.util.*
 
 class User(
     var email: String,
@@ -12,7 +13,7 @@ class User(
     var lastName: String,
     val authorities: Collection<GrantedAuthority?>?,
 ) {
-    lateinit var id: String
+    lateinit var id: UUID
 
     constructor(
         email: String,
@@ -23,7 +24,7 @@ class User(
     }
 
     constructor(
-        id: String,
+        id: UUID,
         email: String,
         password: String,
         firstName: String,
@@ -34,7 +35,7 @@ class User(
     }
 
     constructor(
-        id: String,
+        id: UUID,
         email: String,
         password: String,
         firstName: String,
@@ -50,7 +51,7 @@ class User(
 class UserMapper : RowMapper<User> {
     override fun map(rs: ResultSet, ctx: StatementContext): User {
         return User(
-            id = rs.getString("id"),
+            id = rs.getObject("id", UUID::class.java),
             email = rs.getString("email"),
             password = rs.getString("password"),
             firstName = rs.getString("first_name"), // Different column name

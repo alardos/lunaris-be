@@ -42,7 +42,6 @@ class AuthRepo(@Autowired val jdbi: Jdbi) {
         return jdbi.withHandle<RefreshToken?, Exception> { handle ->
             val result = handle.createQuery("select token from refresh_tokens where token = '${token.value}';")
                 .mapTo(String::class.java).findOne().orElse(null)?.let { RefreshToken(it) }
-            println(result)
             result
         }
     }

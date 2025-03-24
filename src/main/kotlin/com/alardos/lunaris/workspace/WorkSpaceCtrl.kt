@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
+import java.util.*
 
 @RestController
 @RequestMapping("/workspace")
@@ -14,9 +15,12 @@ class WorkSpaceCtrl(
     @Autowired val adapter: WorkspaceAdapter
 ) {
 
-    @GetMapping()
-    fun get(@PathVariable("workspace") workspaceId: String): String {
-        return workspaceId
+    @GetMapping("/{workspace}")
+    fun get(@PathVariable() workspace: UUID): ResponseEntity<Workspace>? {
+        println(workspace)
+        return adapter.find(workspace)
+            ?.let { ResponseEntity(it, HttpStatus.OK) }
+            ?:run { ResponseEntity(HttpStatus.NOT_FOUND) }
     }
 
     @PostMapping("/create")

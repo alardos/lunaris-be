@@ -42,6 +42,7 @@ class AuthAdapter(
     }
 
     fun canAccessWorkspace(user: User, workspaceId: String): Boolean {
+        println("canAccessWorkspace")
         return true
     }
 

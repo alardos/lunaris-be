@@ -3,8 +3,6 @@ package com.alardos.lunaris.auth
 import com.alardos.lunaris.auth.model.LoginCred
 import com.alardos.lunaris.auth.model.User
 import com.alardos.lunaris.core.IntTest
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -20,7 +18,6 @@ class AuthIntTest(
     @Autowired val mvc: MockMvc,
     @Autowired passwordEncoder: PasswordEncoder,
 ): IntTest(adapter,passwordEncoder) {
-    val mapper: ObjectMapper = jacksonObjectMapper()
 
     @Test
     fun login() {

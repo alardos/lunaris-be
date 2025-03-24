@@ -8,5 +8,7 @@
     <include file="db/migration/V1__create_user_table_and_admin_user.sql"/>
     <include file="db/migration/V2__create_refresh_token_table.sql"/>
     <include file="db/migration/V3__create_workspace_table.sql"/>
+    <include file="db/migration/V4__add_workspace_members.sql"/>
+    <include file="db/migration/V5__add_text_card.sql"/>
 
 </databaseChangeLog>

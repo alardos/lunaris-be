@@ -4,6 +4,9 @@ import com.alardos.lunaris.auth.AuthAdapter
 import com.alardos.lunaris.auth.model.AccessToken
 import com.alardos.lunaris.auth.model.LoginCred
 import com.alardos.lunaris.auth.model.User
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -27,6 +30,7 @@ class IntTest(
     @Autowired val authAdapter: AuthAdapter,
     @Autowired val passwordEncoder: PasswordEncoder,
 ) {
+    val mapper: ObjectMapper = jacksonObjectMapper().registerKotlinModule()
 
     companion object {
         val container: PostgreSQLContainer<*> = PostgreSQLContainer("postgres").withReuse(false)

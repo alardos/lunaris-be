@@ -32,7 +32,7 @@ class AuthServ(val secret: SecretKey, val encoder: PasswordEncoder) {
     fun issueAccessFromRefreshToken(refreshToken: RefreshToken, user: User): AccessToken? {
         return if (isValid(refreshToken)) {
             return AccessToken(
-                Jwts.builder().subject(user.id).issuedAt(Date())
+                Jwts.builder().subject(user.id.toString()).issuedAt(Date())
                     .expiration(Date(System.currentTimeMillis() + 1000 * 60 * 30))
                     .signWith(secret)
                     .compact()
@@ -57,7 +57,7 @@ class AuthServ(val secret: SecretKey, val encoder: PasswordEncoder) {
     }
 
     private fun genToken(user: User, lifetime: Long): String {
-        return Jwts.builder().subject(user.id).issuedAt(Date())
+        return Jwts.builder().subject(user.id.toString()).issuedAt(Date())
             .expiration(Date(System.currentTimeMillis() + lifetime))
             .signWith(secret)
             .compact()

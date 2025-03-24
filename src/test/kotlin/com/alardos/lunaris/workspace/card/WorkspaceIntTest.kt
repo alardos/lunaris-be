@@ -6,10 +6,7 @@ import com.alardos.lunaris.core.IntTest
 import com.alardos.lunaris.workspace.Workspace
 import com.alardos.lunaris.workspace.WorkspaceCandidate
 import com.alardos.lunaris.workspace.WorkspaceRepo
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
@@ -27,7 +24,6 @@ class WorkspaceIntTest(
     @Autowired authAdapter: AuthAdapter,
     @Autowired passwordEncoder: PasswordEncoder,
 ): IntTest(authAdapter, passwordEncoder) {
-    val mapper: ObjectMapper = jacksonObjectMapper().registerKotlinModule()
 
     fun defaultWorkspace(user: User, name: String? = null): Workspace {
         return repo.create(user.id, WorkspaceCandidate(name?:"default workspace"))
@@ -48,6 +44,17 @@ class WorkspaceIntTest(
         assertNotNull(repo.find(saved!!.id))
     }
 
+    @Test fun findWorkspace() {
+        val auth = defaultAuth()
+        val workspace = defaultWorkspace(auth.second)
+        val response = mvc.get("/workspace/"+workspace.id) {
+            header("Authorization","Bearer " + auth.first.value)
+        }.andReturn().response
+        val result: Workspace = mapper.readValue(response.contentAsString)
+        assertEquals(200, response.status)
+        assertEquals(result.id,workspace.id)
+    }
+
     @Test fun getMyWorkspaces() {
         val auth = defaultAuth()
         val workspace = defaultWorkspace(auth.second)
@@ -56,6 +63,7 @@ class WorkspaceIntTest(
         }.andReturn().response
         val result: List<Workspace> = mapper.readValue(response.contentAsString)
         assertEquals(200, response.status)
-        assertEquals(listOf(workspace),result)
+        assertEquals(1, result.size)
+        assertEquals(result[0].id,workspace.id)
     }
 }

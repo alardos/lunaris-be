@@ -49,10 +49,16 @@ class AuthServ(val secret: SecretKey, val encoder: PasswordEncoder) {
             .getOrNull()?.payload?.subject
     }
 
-    fun issueFor(user: User): Pair<AccessToken, RefreshToken> {
+    fun expDateOf(token: Token):Date? {
+        return Jwts.parser().verifyWith(secret).build()
+            .runCatching { parseSignedClaims(token.value) }
+            .getOrNull()?.payload?.expiration
+    }
+
+    fun issueFor(user: User, absoluteExpDate:Date?=null): Pair<AccessToken, RefreshToken> {
         return Pair(
             AccessToken(genToken(user, ACCESS_TOKEN_LIFETIME)),
-            RefreshToken(genToken(user, REFRESH_TOKEN_LIFETIME))
+            RefreshToken(genToken(user, absoluteExpDate?.time?:REFRESH_TOKEN_LIFETIME))
         )
     }
 

@@ -33,7 +33,7 @@ class AuthAdapter(
             repo.invalidate(token)
             serv.subjectOf(token)?.let { uuid ->
                 repo.findUser(uuid)?.let { user ->
-                    val tokens = serv.issueFor(user)
+                    val tokens = serv.issueFor(user,serv.expDateOf(token))
                     repo.store(tokens.second)
                     return@let tokens
                 }

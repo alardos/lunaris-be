@@ -1,7 +1,9 @@
 package com.alardos.lunaris.workspace
 
 import com.alardos.lunaris.auth.model.User
-import com.github.michaelbull.result.fold
+import com.alardos.lunaris.card.Card
+import com.alardos.lunaris.card.CardAdapter
+import com.alardos.lunaris.card.CardCandidate
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -10,29 +12,32 @@ import org.springframework.web.bind.annotation.*
 import java.util.*
 
 @RestController
-@RequestMapping("/workspace")
+@RequestMapping("/w/{workspace}")
 class WorkSpaceCtrl(
-    @Autowired val adapter: WorkspaceAdapter
+    @Autowired val adapter: WorkspaceAdapter,
+    @Autowired val cardAdapter: CardAdapter,
 ) {
 
-    @GetMapping("/{workspace}")
+    @PostMapping("/create-card")
+    fun create(
+        @AuthenticationPrincipal creator: User,
+        @PathVariable workspace: UUID,
+        @RequestBody body: CardCandidate
+    ): ResponseEntity<Card> =
+        this.cardAdapter.create(body, creator.id, workspace)
+            ?.let { ResponseEntity(it, HttpStatus.CREATED) }
+            ?:run { ResponseEntity(HttpStatus.BAD_REQUEST) }
+
+
+    @GetMapping()
     fun get(@PathVariable() workspace: UUID): ResponseEntity<Workspace>? {
-        println(workspace)
-        return adapter.find(workspace)
+        return adapter.findDetails(workspace)
             ?.let { ResponseEntity(it, HttpStatus.OK) }
             ?:run { ResponseEntity(HttpStatus.NOT_FOUND) }
     }
 
-    @PostMapping("/create")
-    fun create(@AuthenticationPrincipal creator: User, @RequestBody workspace: WorkspaceCandidate): ResponseEntity<*> {
-        return adapter.create(creator, workspace).fold(
-            { workspace -> ResponseEntity(workspace, HttpStatus.CREATED) },
-            { error -> ResponseEntity(error, HttpStatus.BAD_REQUEST) }
-        )
-    }
+//    @GetMapping("/all")
+//    fun all(@PathVariable workspace: UUID): List<Card> =
+//        cardAdapter.forWorkspace(workspace)
 
-    @GetMapping("/mine")
-    fun mine(@AuthenticationPrincipal owner: User): List<Workspace> {
-        return adapter.findByOwner(owner.id)
-    }
 }

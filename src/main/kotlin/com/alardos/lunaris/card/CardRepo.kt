@@ -52,8 +52,8 @@ class CardRepo(@Autowired val jdbi: Jdbi) {
                     .map(CardRowMapper()).list()
             }
 
+
     fun update(card: Card): Card {
-        println(card)
         return jdbi.withHandle<Card, Exception>
             { handle ->
                 when (card) {

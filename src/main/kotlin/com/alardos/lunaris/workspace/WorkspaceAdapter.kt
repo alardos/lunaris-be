@@ -23,6 +23,8 @@ class WorkspaceAdapter(
         return dbg(repo.find(id))
     }
 
+    fun findDetails(id: UUID): WorkspaceDetails? = repo.findDetails(id)
+
     fun create(creator: User, workspace: WorkspaceCandidate): Result<Workspace, WorkspaceValidatorError> {
         val others = repo.findByOwner(creator.id)
 
@@ -32,5 +34,6 @@ class WorkspaceAdapter(
             Ok(repo.create(creator.id, workspace))
         }
     }
+
 
 }

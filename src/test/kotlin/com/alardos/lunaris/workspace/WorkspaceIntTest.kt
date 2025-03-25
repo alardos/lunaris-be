@@ -2,9 +2,14 @@ package com.alardos.lunaris.workspace
 
 import com.alardos.lunaris.auth.AuthAdapter
 import com.alardos.lunaris.auth.model.User
+import com.alardos.lunaris.card.Card
+import com.alardos.lunaris.card.CardCandidate
+import com.alardos.lunaris.card.CardRepo
+import com.alardos.lunaris.card.CardStrType
 import com.alardos.lunaris.core.IntTest
 import com.fasterxml.jackson.module.kotlin.readValue
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
@@ -12,23 +17,33 @@ import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
+import java.util.*
+import kotlin.test.assertTrue
 
 class WorkspaceIntTest(
     @Autowired val mvc: MockMvc,
     @Autowired val repo: WorkspaceRepo,
     @Autowired authAdapter: AuthAdapter,
     @Autowired passwordEncoder: PasswordEncoder,
+    @Autowired val cardRepo: CardRepo,
 ): IntTest(authAdapter, passwordEncoder) {
 
+    fun defaultTextCard(user: User, content: String? = null, workspace: UUID? = null): Card {
+        val workspace = workspace?:defaultWorkspace(user).id
+        return cardRepo.insert(CardCandidate(CardStrType.text, content ?: "defaultTextCard"),user.id,workspace)
+    }
+
     fun defaultWorkspace(user: User, name: String? = null): Workspace {
-        return repo.create(user.id, WorkspaceCandidate(name?:"default workspace"))
+        val workspace = repo.create(user.id, WorkspaceCandidate(name?:"default workspace"))
+        val card = defaultTextCard(user, workspace = workspace.id)
+        return workspace
     }
 
     @Test
     fun createWorkspace() {
         val auth = defaultAuth()
         val workspace = WorkspaceCandidate("MyWorkspace")
-        val response = mvc.post("/workspace/create") {
+        val response = mvc.post("/create-workspace") {
             header("Authorization","Bearer " + auth.first.value)
             contentType = MediaType.APPLICATION_JSON
             content = """{
@@ -36,32 +51,33 @@ class WorkspaceIntTest(
             }""".trimIndent()
         }.andReturn().response
         val saved = mapper.readValue<Workspace>(response.contentAsString, Workspace::class.java)
-        Assertions.assertEquals(201, response.status)
+        assertEquals(201, response.status)
         Assertions.assertNotNull(repo.find(saved!!.id))
     }
 
-    @Test
-    fun findWorkspace() {
+
+    @Test fun findWorkspaceDetails() {
         val auth = defaultAuth()
         val workspace = defaultWorkspace(auth.second)
-        val response = mvc.get("/workspace/"+workspace.id) {
+        val response = mvc.get("/w/"+workspace.id) {
             header("Authorization","Bearer " + auth.first.value)
         }.andReturn().response
-        val result: Workspace = mapper.readValue(response.contentAsString)
-        Assertions.assertEquals(200, response.status)
-        Assertions.assertEquals(result.id, workspace.id)
+        val result: WorkspaceDetails = mapper.readValue(response.contentAsString)
+        assertEquals(200, response.status)
+        assertEquals(result.id, workspace.id)
+        assertTrue(result.cards.isNotEmpty())
     }
 
     @Test
     fun getMyWorkspaces() {
         val auth = defaultAuth()
         val workspace = defaultWorkspace(auth.second)
-        val response = mvc.get("/workspace/mine") {
+        val response = mvc.get("/mine") {
             header("Authorization","Bearer " + auth.first.value)
         }.andReturn().response
         val result: List<Workspace> = mapper.readValue(response.contentAsString)
-        Assertions.assertEquals(200, response.status)
-        Assertions.assertEquals(1, result.size)
-        Assertions.assertEquals(result[0].id, workspace.id)
+        assertEquals(200, response.status)
+        assertEquals(1, result.size)
+        assertEquals(result[0].id, workspace.id)
     }
 }

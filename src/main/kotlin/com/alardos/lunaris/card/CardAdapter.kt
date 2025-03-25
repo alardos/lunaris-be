@@ -25,8 +25,8 @@ class CardAdapter(
     fun forWorkspace(workspace: UUID) =
         repo.forWorkspace(workspace)
 
-    fun update(workspace: UUID, card: Card)  =
-        workspaceRepo.find(workspace)
+    fun update(card: Card)  =
+        workspaceRepo.find(card.workspace)
             ?.let { w -> serv.validate(w,card) ?.let { Err(it) } }
             ?:run { Ok(repo.update(card)) }
 

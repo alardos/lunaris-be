@@ -1,6 +1,7 @@
 package com.alardos.lunaris.workspace
 
 import com.alardos.lunaris.auth.model.User
+import com.alardos.lunaris.card.AccessLevel
 import com.alardos.lunaris.card.Card
 import com.alardos.lunaris.card.CardAdapter
 import com.alardos.lunaris.card.CardCandidate
@@ -27,6 +28,28 @@ class WorkSpaceCtrl(
         this.cardAdapter.create(body, creator.id, workspace)
             ?.let { ResponseEntity(it, HttpStatus.CREATED) }
             ?:run { ResponseEntity(HttpStatus.BAD_REQUEST) }
+
+
+    @GetMapping("/distribution/3col")
+    fun distribution(@PathVariable() workspace: UUID): ResponseEntity<Distribution>? {
+        return adapter.findDistribution(workspace)
+            ?.let { ResponseEntity(it, HttpStatus.OK) }
+            ?:run { ResponseEntity(HttpStatus.NOT_FOUND) }
+    }
+
+
+    @PutMapping("/distribution/update")
+    fun updateDistribution(@AuthenticationPrincipal user: User, @PathVariable() workspace: UUID, @RequestBody() distribution: Distribution): ResponseEntity<Distribution?> {
+        if (!cardAdapter.hasAccess(user.id, distribution.items.map{it.card}, AccessLevel.Move)) {
+            return ResponseEntity(HttpStatus.UNAUTHORIZED)
+        }
+
+        return adapter.updateDistribution(workspace,distribution)?. let {
+            ResponseEntity(it, HttpStatus.OK)
+        }?:run{
+            ResponseEntity(HttpStatus.BAD_REQUEST)
+        }
+    }
 
 
     @GetMapping()

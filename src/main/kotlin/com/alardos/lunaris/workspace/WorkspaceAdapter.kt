@@ -25,6 +25,20 @@ class WorkspaceAdapter(
 
     fun findDetails(id: UUID): WorkspaceDetails? = repo.findDetails(id)
 
+    fun findDistribution(workspace: UUID) =
+        repo.distributionItemsFor(workspace)
+            ?.let { Distribution(it) }
+
+
+    fun updateDistribution(workspace: UUID, distribution: Distribution): Distribution? {
+        return findDistribution(workspace)?.let { saved ->
+            if (distribution.hash != saved.hash) return null;
+            repo.updateDistribution(distribution)
+            return distribution.updateHash()
+        }
+    }
+
+
     fun create(creator: User, workspace: WorkspaceCandidate): Result<Workspace, WorkspaceValidatorError> {
         val others = repo.findByOwner(creator.id)
 

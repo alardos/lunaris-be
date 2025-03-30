@@ -31,4 +31,9 @@ class CardAdapter(
             ?:run { Ok(repo.update(card)) }
 
 
+    fun hasAccess(user: UUID, cards: List<UUID>, level: AccessLevel): Boolean {
+        val access = repo.findUserAccess(cards)
+        return serv.hasAccess(user, cards, access, level)
+    }
+
 }

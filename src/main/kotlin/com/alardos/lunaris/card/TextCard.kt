@@ -34,18 +34,33 @@ class TextCard(
 class CardRowMapper : RowMapper<Card> {
     override fun map(rs: ResultSet, ctx: StatementContext): Card =
         when {
-            rs.getString("content") != null ->
+            rs.getString("text_card.content") != null ->
                 TextCard(
-                    id = rs.getObject("id",UUID::class.java),
-                    owner = rs.getObject("owner",UUID::class.java),
-                    workspace = rs.getObject("workspace",UUID::class.java),
-                    createdAt = rs.getTimestamp("created_at").time,
-                    content = rs.getString("content"),
+                    id = rs.getObject("card.id",UUID::class.java),
+                    owner = rs.getObject("card.owner",UUID::class.java),
+                    workspace = rs.getObject("card.workspace",UUID::class.java),
+                    createdAt = rs.getTimestamp("card.created_at").time,
+                    content = rs.getString("text_card.content"),
                 )
             else -> throw RuntimeException("could not tell exact card type from query")
         }
 }
 
+data class CardAccess(val card: UUID, val cardOwner: UUID, val workspaceOwner: UUID, val workspaceMembers: List<UUID>)
+class CardAccessRowMapper: RowMapper<CardAccess> {
+    override fun map(
+        rs: ResultSet,
+        ctx: StatementContext?
+    ): CardAccess =
+        CardAccess(
+            card = rs.getObject("card.id",UUID::class.java),
+            cardOwner = rs.getObject("card.owner",UUID::class.java),
+            workspaceOwner = rs.getObject("workspace.owner",UUID::class.java),
+            workspaceMembers = (rs.getArray("workspace.members").array as Array<UUID>).asList(),
+        )
+
+
+}
 
 class CardJsonMapper: JsonDeserializer<Card>() {
     override fun deserialize(p: JsonParser, ctxt: DeserializationContext): Card? {

@@ -24,7 +24,6 @@ class CardIntTest(
 ): WorkspaceIntTest(mvc, workspaceRepo, authAdapter,passwordEncoder,cardRepo) {
     val serv = CardServ()
 
-
     @Test fun createTextCard() {
         val auth = defaultAuth()
         val candidate = CardCandidate(CardStrType.text, "")

@@ -3,6 +3,7 @@ package com.alardos.lunaris.workspace
 import com.alardos.lunaris.card.Card
 import com.alardos.lunaris.card.CardRowMapper
 import org.jdbi.v3.core.mapper.RowMapper
+import org.jdbi.v3.core.result.ResultSetAccumulator
 import org.jdbi.v3.core.statement.StatementContext
 import java.security.MessageDigest
 import java.sql.ResultSet
@@ -47,13 +48,19 @@ open class Workspace(
     var members: List<UUID>,
 )
 
+public enum class MemberRank{ Owner, Participant }
+data class Member(
+    val id: UUID,
+    val email: String,
+    val color: String,
+    val rank: MemberRank
+)
 class WorkspaceDetails(
-    id: UUID,
-    name: String,
-    owner: UUID,
-    members: List<UUID>,
+    val id: UUID,
+    val name: String,
+    val members: MutableList<Member>,
     val cards: MutableList<Card>
-): Workspace(id,name,owner,members)
+)
 
 
 class WorkspaceMapper : RowMapper<Workspace> {
@@ -68,19 +75,52 @@ class WorkspaceMapper : RowMapper<Workspace> {
     }
 }
 
-class WorkspaceDetailsMapper : RowMapper<WorkspaceDetails> {
-    override fun map(rs: ResultSet, ctx: StatementContext): WorkspaceDetails {
-        return WorkspaceDetails(
-            id = rs.getObject("workspace.id", UUID::class.java),
-            owner = rs.getObject("workspace.owner", UUID::class.java),
-            name = rs.getString("workspace.name"),
-            // the cast asserts the type, will throw exception if the result set is incompatible
-            members = (rs.getArray("workspace.members").array as Array<UUID>).asList(),
-            cards = if (rs.getObject("card.id", UUID::class.java) != null)
-                mutableListOf(CardRowMapper().map(rs,ctx))
-            else
-                mutableListOf()
-        )
+class WorkspaceDetailsAccumulator : ResultSetAccumulator<WorkspaceDetails> {
+    override fun apply(
+        workspace: WorkspaceDetails?,
+        rs: ResultSet,
+        ctx: StatementContext
+    ): WorkspaceDetails? {
+        return if (workspace == null) {
+            val user = rs.getObject("user.id") as UUID?
+            val card = rs.getObject("card.id") as UUID?
+            WorkspaceDetails(
+                id = rs.getObject("workspace.id", UUID::class.java),
+                name = rs.getString("workspace.name"),
+                members = user
+                    ?.let {
+                        mutableListOf(
+                            Member(
+                                id = rs.getObject("user.id", UUID::class.java),
+                                email = rs.getString("user.email"),
+                                color = rs.getString("user.color"),
+                                rank = MemberRank.valueOf(rs.getString("user.rank"))
+                            )
+                        )
+                    }
+                    ?: mutableListOf(),
+                cards = card
+                    ?.let { mutableListOf(CardRowMapper().map(rs, ctx)) }
+                    ?: mutableListOf()
+            )
+
+        } else {
+            val member = Member(
+                id = rs.getObject("user.id", UUID::class.java),
+                email = rs.getString("user.email"),
+                color = rs.getString("user.color"),
+                rank = MemberRank.valueOf(rs.getString("user.rank"))
+            )
+            if (workspace.members.none { o -> o.id == member.id })
+                workspace.members.add(member)
+
+            val card = CardRowMapper().map(rs, ctx)
+            if (workspace.cards.none { o -> o.id == card.id })
+                workspace.cards.add(card)
+
+            workspace
+        }
+
     }
 }
 

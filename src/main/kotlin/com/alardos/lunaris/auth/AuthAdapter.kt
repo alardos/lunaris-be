@@ -19,23 +19,25 @@ class AuthAdapter(
         return repo.save(user)
     }
 
-    fun login(cred: LoginCred): Pair<AccessToken, RefreshToken>? {
+    fun login(cred: LoginCred): TokenResponse? {
         val user = repo.findByEmail(cred.email)
         return user?.let {
             val tokens = serv.login(cred, it)
-            tokens?.run { repo.store(tokens.second) }
-            tokens
+            tokens?.let {
+                repo.store(tokens.second)
+                TokenResponse(tokens.first.value,tokens.second.value,user.id.toString())
+            }
         }
     }
 
-    fun refresh(token: RefreshToken): Pair<AccessToken, RefreshToken>? {
+    fun refresh(token: RefreshToken): TokenResponse? {
         return repo.find(token)?.let {
             repo.invalidate(token)
             serv.subjectOf(token)?.let { uuid ->
                 repo.findUser(uuid)?.let { user ->
                     val tokens = serv.issueFor(user,serv.expDateOf(token))
                     repo.store(tokens.second)
-                    return@let tokens
+                    return@let TokenResponse(tokens.first.value,tokens.second.value,user.id.toString())
                 }
             }
         }

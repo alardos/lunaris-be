@@ -52,7 +52,7 @@ class IntTest(
         var user = User("test@test.com", password, "fname", "lname")
         user = authAdapter.signup(user)
 
-        return authAdapter.login(LoginCred(user.email,password))!!.first to user
+        return AccessToken(authAdapter.login(LoginCred(user.email,password))!!.accessToken) to user
     }
 
 }

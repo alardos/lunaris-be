@@ -11,5 +11,6 @@
     <include file="db/migration/V4__add_workspace_members.sql"/>
     <include file="db/migration/V5__add_text_card.sql"/>
     <include file="db/migration/V6__add_card_distribution.sql"/>
+    <include file="db/migration/V7__personalized_colors.sql"/>
 
 </databaseChangeLog>

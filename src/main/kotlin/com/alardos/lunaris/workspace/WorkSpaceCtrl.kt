@@ -53,7 +53,7 @@ class WorkSpaceCtrl(
 
 
     @GetMapping()
-    fun get(@PathVariable() workspace: UUID): ResponseEntity<Workspace>? {
+    fun get(@PathVariable() workspace: UUID): ResponseEntity<WorkspaceDetails>? {
         return adapter.findDetails(workspace)
             ?.let { ResponseEntity(it, HttpStatus.OK) }
             ?:run { ResponseEntity(HttpStatus.NOT_FOUND) }

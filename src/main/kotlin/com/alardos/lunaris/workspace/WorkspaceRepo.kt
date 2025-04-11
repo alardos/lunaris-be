@@ -31,7 +31,10 @@ class WorkspaceRepo(@Autowired val jdbi: Jdbi) {
             w.id as "workspace.id", 
             w.name as "workspace.name", 
             w.owner as "workspace.owner", 
-            array_remove(array_agg(wu.user),null) as "workspace.members",
+            u.id as "user.id",
+            u.email as "user.email",
+            wu.color as "user.color",
+            wu.rank as "user.rank",
             c.id as "card.id",
             c.owner as "card.owner",
             tc.content as "text_card.content",
@@ -41,10 +44,9 @@ class WorkspaceRepo(@Autowired val jdbi: Jdbi) {
             left join workspace_user wu on w.id = wu.workspace
             left join cards c on c.workspace = w.id
             left join text_cards tc on tc.id = c.id
-            where w.id = '$id'
-            group by w.id, c.id, tc.id;        
-        """).map(WorkspaceDetailsMapper())
-        .reduce { acc, n -> acc.cards.addAll(n.cards); acc } }
+            left join users u on wu."user" = u.id
+            where w.id = '$id'        
+        """).reduceResultSet(null,WorkspaceDetailsAccumulator()) }
     }
 
     fun distributionItemsFor(id: UUID): List<DistributionItem>? {

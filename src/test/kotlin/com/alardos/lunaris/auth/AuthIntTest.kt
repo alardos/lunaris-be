@@ -53,7 +53,7 @@ class AuthIntTest(
         val tokens = adapter.login(LoginCred(user.email, password))
         val response = mvc.post("/auth/refresh") {
             contentType = MediaType.APPLICATION_JSON
-            content = tokens?.second?.value
+            content = tokens?.refreshToken
         }.andReturn().response
         assertFalse(response.contentAsString.isEmpty())
         assertTrue(response.status == 200)

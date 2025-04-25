@@ -3,8 +3,8 @@ package com.alardos.lunaris.auth
 import com.alardos.lunaris.auth.model.LoginCred
 import com.alardos.lunaris.auth.model.User
 import com.alardos.lunaris.core.IntTest
+import com.alardos.lunaris.core.TransactionalTest
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
 import org.springframework.security.crypto.password.PasswordEncoder
@@ -19,7 +19,7 @@ class AuthIntTest(
     @Autowired passwordEncoder: PasswordEncoder,
 ): IntTest(adapter,passwordEncoder) {
 
-    @Test
+    @TransactionalTest
     fun login() {
         val password = "password"
         val user = repo.save(User("test@test.com", passwordEncoder.encode(password), "fname", "lname"))
@@ -30,7 +30,7 @@ class AuthIntTest(
         assertEquals(true, result.isNotEmpty())
     }
 
-    @Test
+    @TransactionalTest
     fun signup() {
         val user = User("test@test.com", "password", "fname", "lname")
         mvc.post("/auth/signup") {
@@ -45,7 +45,7 @@ class AuthIntTest(
         assertNotNull(repo.findByEmail(user.email))
     }
 
-    @Test
+    @TransactionalTest
     fun refresh() {
         val password = "password"
         val user = User("test@test.com", passwordEncoder.encode(password), "fname", "lname")

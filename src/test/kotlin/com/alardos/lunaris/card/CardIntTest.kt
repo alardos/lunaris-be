@@ -1,12 +1,12 @@
 package com.alardos.lunaris.card
 
 import com.alardos.lunaris.auth.AuthAdapter
+import com.alardos.lunaris.core.TransactionalTest
 import com.alardos.lunaris.workspace.WorkspaceIntTest
 import com.alardos.lunaris.workspace.WorkspaceRepo
 import com.fasterxml.jackson.module.kotlin.readValue
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
 import org.springframework.security.crypto.password.PasswordEncoder
@@ -24,7 +24,8 @@ class CardIntTest(
 ): WorkspaceIntTest(mvc, workspaceRepo, authAdapter,passwordEncoder,cardRepo) {
     val serv = CardServ()
 
-    @Test fun createTextCard() {
+    @TransactionalTest
+    fun createTextCard() {
         val auth = defaultAuth()
         val candidate = CardCandidate(CardStrType.text, "")
         val workspace = defaultWorkspace(auth.second)
@@ -39,7 +40,8 @@ class CardIntTest(
         assertNotNull(cardRepo.find(saved!!.id))
     }
 
-    @Test fun find() {
+    @TransactionalTest
+    fun find() {
         val auth = defaultAuth()
         val card = defaultTextCard(auth.second)
         val response = mvc.get("/c/${card.id}") {
@@ -50,7 +52,8 @@ class CardIntTest(
         assertEquals(result.id, card.id)
     }
 
-    @Test fun update() {
+    @TransactionalTest
+    fun update() {
         val auth = defaultAuth()
         val card = defaultTextCard(auth.second)
         (card as TextCard).content = "updated"

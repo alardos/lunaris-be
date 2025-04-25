@@ -7,10 +7,10 @@ import com.alardos.lunaris.card.CardCandidate
 import com.alardos.lunaris.card.CardRepo
 import com.alardos.lunaris.card.CardStrType
 import com.alardos.lunaris.core.IntTest
+import com.alardos.lunaris.core.TransactionalTest
 import com.fasterxml.jackson.module.kotlin.readValue
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
 import org.springframework.security.crypto.password.PasswordEncoder
@@ -39,7 +39,7 @@ class WorkspaceIntTest(
         return workspace
     }
 
-    @Test
+    @TransactionalTest
     fun createWorkspace() {
         val auth = defaultAuth()
         val workspace = WorkspaceCandidate("MyWorkspace")
@@ -56,7 +56,9 @@ class WorkspaceIntTest(
     }
 
 
-    @Test fun findWorkspaceDetails() {
+
+    @TransactionalTest
+    fun findWorkspaceDetails() {
         val auth = defaultAuth()
         val workspace = defaultWorkspace(auth.second)
         val response = mvc.get("/w/"+workspace.id) {
@@ -68,7 +70,7 @@ class WorkspaceIntTest(
         assertTrue(result.cards.isNotEmpty())
     }
 
-    @Test
+    @TransactionalTest
     fun getMyWorkspaces() {
         val auth = defaultAuth()
         val workspace = defaultWorkspace(auth.second)

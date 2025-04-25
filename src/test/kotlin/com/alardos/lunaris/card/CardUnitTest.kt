@@ -1,5 +1,6 @@
 package com.alardos.lunaris.card
 
+import com.alardos.lunaris.card.model.CardAccess
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test

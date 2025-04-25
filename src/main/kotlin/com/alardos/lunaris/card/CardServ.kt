@@ -1,5 +1,7 @@
 package com.alardos.lunaris.card
 
+import com.alardos.lunaris.card.model.Card
+import com.alardos.lunaris.card.model.CardAccess
 import com.alardos.lunaris.workspace.Workspace
 import java.util.*
 

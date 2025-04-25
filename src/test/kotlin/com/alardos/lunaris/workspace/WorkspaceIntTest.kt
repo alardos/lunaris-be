@@ -2,12 +2,13 @@ package com.alardos.lunaris.workspace
 
 import com.alardos.lunaris.auth.AuthAdapter
 import com.alardos.lunaris.auth.model.User
-import com.alardos.lunaris.card.Card
-import com.alardos.lunaris.card.CardCandidate
-import com.alardos.lunaris.card.CardRepo
-import com.alardos.lunaris.card.CardStrType
+import com.alardos.lunaris.card.dao.CardDAO
+import com.alardos.lunaris.card.model.Card
+import com.alardos.lunaris.card.model.CardCandidate
+import com.alardos.lunaris.card.model.CardStrType
 import com.alardos.lunaris.core.IntTest
 import com.alardos.lunaris.core.TransactionalTest
+import com.alardos.lunaris.workspace.dao.WorkspaceDAO
 import com.fasterxml.jackson.module.kotlin.readValue
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -22,15 +23,15 @@ import kotlin.test.assertTrue
 
 class WorkspaceIntTest(
     @Autowired val mvc: MockMvc,
-    @Autowired val repo: WorkspaceRepo,
+    @Autowired val repo: WorkspaceDAO,
     @Autowired authAdapter: AuthAdapter,
     @Autowired passwordEncoder: PasswordEncoder,
-    @Autowired val cardRepo: CardRepo,
+    @Autowired val cardDAO: CardDAO,
 ): IntTest(authAdapter, passwordEncoder) {
 
     fun defaultTextCard(user: User, content: String? = null, workspace: UUID? = null): Card {
         val workspace = workspace?:defaultWorkspace(user).id
-        return cardRepo.insert(CardCandidate(CardStrType.text, content ?: "defaultTextCard"),user.id,workspace)
+        return cardDAO.insert(CardCandidate(CardStrType.text, content ?: "defaultTextCard"),user.id,workspace)
     }
 
     fun defaultWorkspace(user: User, name: String? = null): Workspace {

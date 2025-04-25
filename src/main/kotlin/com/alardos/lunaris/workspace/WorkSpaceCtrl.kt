@@ -2,9 +2,9 @@ package com.alardos.lunaris.workspace
 
 import com.alardos.lunaris.auth.model.User
 import com.alardos.lunaris.card.AccessLevel
-import com.alardos.lunaris.card.Card
 import com.alardos.lunaris.card.CardAdapter
-import com.alardos.lunaris.card.CardCandidate
+import com.alardos.lunaris.card.model.Card
+import com.alardos.lunaris.card.model.CardCandidate
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity

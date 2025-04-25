@@ -1,13 +1,10 @@
-package com.alardos.lunaris.card
+package com.alardos.lunaris.card.model
 
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonDeserializer
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
-import org.jdbi.v3.core.mapper.RowMapper
-import org.jdbi.v3.core.statement.StatementContext
-import java.sql.ResultSet
 import java.util.*
 
 @JsonDeserialize(using = CardJsonMapper::class)
@@ -31,36 +28,8 @@ class TextCard(
     var content: String
 ): Card(CardStrType.text,id,owner,workspace,createdAt)
 
-class CardRowMapper : RowMapper<Card> {
-    override fun map(rs: ResultSet, ctx: StatementContext): Card =
-        when {
-            rs.getString("text_card.content") != null ->
-                TextCard(
-                    id = rs.getObject("card.id",UUID::class.java),
-                    owner = rs.getObject("card.owner",UUID::class.java),
-                    workspace = rs.getObject("card.workspace",UUID::class.java),
-                    createdAt = rs.getTimestamp("card.created_at").time,
-                    content = rs.getString("text_card.content"),
-                )
-            else -> throw RuntimeException("could not tell exact card type from query")
-        }
-}
 
 data class CardAccess(val card: UUID, val cardOwner: UUID, val workspaceOwner: UUID, val workspaceMembers: List<UUID>)
-class CardAccessRowMapper: RowMapper<CardAccess> {
-    override fun map(
-        rs: ResultSet,
-        ctx: StatementContext?
-    ): CardAccess =
-        CardAccess(
-            card = rs.getObject("card.id",UUID::class.java),
-            cardOwner = rs.getObject("card.owner",UUID::class.java),
-            workspaceOwner = rs.getObject("workspace.owner",UUID::class.java),
-            workspaceMembers = (rs.getArray("workspace.members").array as Array<UUID>).asList(),
-        )
-
-
-}
 
 class CardJsonMapper: JsonDeserializer<Card>() {
     override fun deserialize(p: JsonParser, ctxt: DeserializationContext): Card? {

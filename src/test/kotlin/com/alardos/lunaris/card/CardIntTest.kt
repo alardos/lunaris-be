@@ -1,9 +1,13 @@
 package com.alardos.lunaris.card
 
 import com.alardos.lunaris.auth.AuthAdapter
+import com.alardos.lunaris.card.dao.CardDAO
+import com.alardos.lunaris.card.model.CardCandidate
+import com.alardos.lunaris.card.model.CardStrType
+import com.alardos.lunaris.card.model.TextCard
 import com.alardos.lunaris.core.TransactionalTest
 import com.alardos.lunaris.workspace.WorkspaceIntTest
-import com.alardos.lunaris.workspace.WorkspaceRepo
+import com.alardos.lunaris.workspace.dao.WorkspaceDAO
 import com.fasterxml.jackson.module.kotlin.readValue
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -17,11 +21,11 @@ import org.springframework.test.web.servlet.put
 
 class CardIntTest(
     @Autowired mvc: MockMvc,
-    @Autowired cardRepo: CardRepo,
-    @Autowired val workspaceRepo: WorkspaceRepo,
+    @Autowired cardDAO: CardDAO,
+    @Autowired val workspaceDAO: WorkspaceDAO,
     @Autowired authAdapter: AuthAdapter,
     @Autowired passwordEncoder: PasswordEncoder,
-): WorkspaceIntTest(mvc, workspaceRepo, authAdapter,passwordEncoder,cardRepo) {
+): WorkspaceIntTest(mvc, workspaceDAO, authAdapter,passwordEncoder,cardDAO) {
     val serv = CardServ()
 
     @TransactionalTest
@@ -37,7 +41,7 @@ class CardIntTest(
         }.andReturn().response
         val saved = mapper.readValue<TextCard>(response.contentAsString, TextCard::class.java)
         assertEquals(201, response.status)
-        assertNotNull(cardRepo.find(saved!!.id))
+        assertNotNull(cardDAO.find(saved!!.id))
     }
 
     @TransactionalTest
@@ -65,7 +69,7 @@ class CardIntTest(
         val result: TextCard = mapper.readValue(response.contentAsString)
         assertEquals(200, response.status)
         assertEquals(result.id, card.id)
-        assertEquals(card.content, (cardRepo.find(card.id)as TextCard).content)
+        assertEquals(card.content, (cardDAO.find(card.id)as TextCard).content)
         assertEquals(card.content, result.content)
     }
 }

@@ -1,13 +1,19 @@
-package com.alardos.lunaris.card
+package com.alardos.lunaris.card.dao
 
-import com.alardos.lunaris.core.toSqlList
+import com.alardos.lunaris.card.model.Card
+import com.alardos.lunaris.card.model.CardCandidate
+import com.alardos.lunaris.card.model.CardStrType
+import com.alardos.lunaris.card.model.TextCard
 import org.jdbi.v3.core.Jdbi
+import org.jdbi.v3.core.mapper.RowMapper
+import org.jdbi.v3.core.statement.StatementContext
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Repository
+import java.sql.ResultSet
 import java.util.*
 
 @Repository
-class CardRepo(@Autowired val jdbi: Jdbi) {
+class CardDAO(@Autowired val jdbi: Jdbi) {
 
     fun insert(candidate: CardCandidate, owner: UUID, workspace: UUID): Card =
         jdbi.withHandle<Card, Exception>
@@ -24,12 +30,12 @@ class CardRepo(@Autowired val jdbi: Jdbi) {
                         SELECT id, '' FROM inserted_card
                         RETURNING id; """
                     ).mapTo(UUID::class.java).first()
-                    TextCard(id,owner,workspace,Date().time,candidate.content!!)
+                    TextCard(id, owner, workspace, Date().time, candidate.content!!)
                 }
             }
         }
 
-    fun find(id: UUID):Card? =
+    fun find(id: UUID): Card? =
         jdbi.withHandle<Card, Exception>
             { handle ->
                 handle.select("""
@@ -80,20 +86,19 @@ class CardRepo(@Autowired val jdbi: Jdbi) {
 
             }
     }
-    fun findUserAccess(cards: List<UUID>): List<CardAccess> {
-        return jdbi.withHandle<List<CardAccess>, Exception>
-        { handle -> handle.select("""
-            select 
-            c.id as "card.id",
-            w.owner as "workspace.owner", 
-            c.owner as "card.owner",
-            array_remove(array_agg(wu.user),null) as "workspace.members"
-            from cards c
-            left join workspaces w on c.workspace = w.id
-            left join workspace_user wu on w.id = wu.workspace
-            where c.id in (${cards.toSqlList()})
-            group by c.id, w.id;        
-        """).map(CardAccessRowMapper()).list() }
-    }
+}
 
+class CardRowMapper : RowMapper<Card> {
+    override fun map(rs: ResultSet, ctx: StatementContext): Card =
+        when {
+            rs.getString("text_card.content") != null ->
+                TextCard(
+                    id = rs.getObject("card.id", UUID::class.java),
+                    owner = rs.getObject("card.owner", UUID::class.java),
+                    workspace = rs.getObject("card.workspace", UUID::class.java),
+                    createdAt = rs.getTimestamp("card.created_at").time,
+                    content = rs.getString("text_card.content"),
+                )
+            else -> throw RuntimeException("could not tell exact card type from query")
+        }
 }

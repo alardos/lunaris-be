@@ -1,9 +1,6 @@
 package com.alardos.lunaris.auth.model
 
-import org.jdbi.v3.core.mapper.RowMapper
-import org.jdbi.v3.core.statement.StatementContext
 import org.springframework.security.core.GrantedAuthority
-import java.sql.ResultSet
 import java.util.*
 
 class User(
@@ -48,15 +45,3 @@ class User(
 
 
 
-class UserMapper : RowMapper<User> {
-    override fun map(rs: ResultSet, ctx: StatementContext): User {
-        return User(
-            id = rs.getObject("id", UUID::class.java),
-            email = rs.getString("email"),
-            password = rs.getString("password"),
-            firstName = rs.getString("first_name"), // Different column name
-            lastName = rs.getString("last_name"), // Different column name
-            HashSet(),
-        )
-    }
-}

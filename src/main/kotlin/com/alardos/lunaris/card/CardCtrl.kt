@@ -1,5 +1,6 @@
 package com.alardos.lunaris.card
 
+import com.alardos.lunaris.card.model.Card
 import com.github.michaelbull.result.fold
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus

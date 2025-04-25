@@ -29,7 +29,7 @@ import org.testcontainers.junit.jupiter.Testcontainers
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @AutoConfigureMockMvc
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-@Testcontainers
+@Testcontainers(parallel = true)
 class IntTest(
     @Autowired val authAdapter: AuthAdapter,
     @Autowired val passwordEncoder: PasswordEncoder,

@@ -1,16 +1,19 @@
-package com.alardos.lunaris.auth
+package com.alardos.lunaris.auth.dao
 
-import com.alardos.lunaris.auth.model.RefreshToken
 import com.alardos.lunaris.auth.model.User
-import com.alardos.lunaris.auth.model.UserMapper
 import org.jdbi.v3.core.Jdbi
+import org.jdbi.v3.core.mapper.RowMapper
+import org.jdbi.v3.core.statement.StatementContext
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Repository
+import java.sql.ResultSet
+import java.util.*
 
 @Repository
-class AuthRepo(@Autowired val jdbi: Jdbi) {
+class UserDAO(@Autowired val jdbi: Jdbi) {
+    val tokenDAO = TokenDAO(jdbi)
 
-    fun findUser(id: String): User? {
+    fun find(id: String): User? {
         return jdbi.withHandle<User?, Exception> { handle ->
             handle.createQuery("select * from public.users where id = '$id'")
                 .map(UserMapper()).findOne().orElse(null)
@@ -24,7 +27,7 @@ class AuthRepo(@Autowired val jdbi: Jdbi) {
         }
     }
 
-    fun save(user: User): User {
+    fun insert(user: User): User {
         return jdbi.withHandle<User, Exception> { handle ->
             handle.createQuery("""insert into users(email,password,first_name,last_name) 
                 values ('${user.email}', '${user.password}', '${user.firstName}', '${user.lastName}') returning *""")
@@ -32,23 +35,17 @@ class AuthRepo(@Autowired val jdbi: Jdbi) {
         }
     }
 
-    fun store(token: RefreshToken) {
-        jdbi.useHandle<Exception> { handle ->
-            handle.execute("insert into refresh_tokens(token) values ('${token.value}');")
-        }
-    }
+}
 
-    fun find(token: RefreshToken): RefreshToken? {
-        return jdbi.withHandle<RefreshToken?, Exception> { handle ->
-            val result = handle.createQuery("select token from refresh_tokens where token = '${token.value}';")
-                .mapTo(String::class.java).findOne().orElse(null)?.let { RefreshToken(it) }
-            result
-        }
-    }
-
-    fun invalidate(token: RefreshToken) {
-        return jdbi.useHandle<Exception> { handle ->
-            handle.execute("delete from refresh_tokens where token = '${token.value}'")
-        }
+class UserMapper : RowMapper<User> {
+    override fun map(rs: ResultSet, ctx: StatementContext): User {
+        return User(
+            id = rs.getObject("id", UUID::class.java),
+            email = rs.getString("email"),
+            password = rs.getString("password"),
+            firstName = rs.getString("first_name"), // Different column name
+            lastName = rs.getString("last_name"), // Different column name
+            HashSet(),
+        )
     }
 }

@@ -2,6 +2,9 @@ package com.alardos.lunaris.workspace
 
 import com.alardos.lunaris.auth.model.User
 import com.alardos.lunaris.core.dbg
+import com.alardos.lunaris.workspace.dao.DistributionDAO
+import com.alardos.lunaris.workspace.dao.WorkspaceDAO
+import com.alardos.lunaris.workspace.dao.WorkspaceDetailsDAO
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
@@ -11,7 +14,9 @@ import java.util.*
 
 @Service
 class WorkspaceAdapter(
-    @Autowired val repo: WorkspaceRepo
+    @Autowired val repo: WorkspaceDAO,
+    @Autowired val workspaceDetailsDAO: WorkspaceDetailsDAO,
+    @Autowired val distributionDAO: DistributionDAO,
 ) {
     val serv = WorkspaceServ()
 
@@ -23,17 +28,14 @@ class WorkspaceAdapter(
         return dbg(repo.find(id))
     }
 
-    fun findDetails(id: UUID): WorkspaceDetails? = repo.findDetails(id)
+    fun findDetails(id: UUID): WorkspaceDetails? = workspaceDetailsDAO.find(id)
 
-    fun findDistribution(workspace: UUID) =
-        repo.distributionItemsFor(workspace)
-            ?.let { Distribution(it) }
-
+    fun findDistribution(workspace: UUID) = distributionDAO.find(workspace)
 
     fun updateDistribution(workspace: UUID, distribution: Distribution): Distribution? {
         return findDistribution(workspace)?.let { saved ->
             if (distribution.hash != saved.hash) return null;
-            repo.updateDistribution(distribution)
+            distributionDAO.update(distribution)
             return distribution.updateHash()
         }
     }
